@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 export function useAsyncStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {
     try {
-      const raw = localStorage.getItem(key);
+      if (typeof window === 'undefined') return initialValue;
+      const raw = window.localStorage.getItem(key);
       return raw ? (JSON.parse(raw) as T) : initialValue;
     } catch {
       return initialValue;
@@ -12,9 +13,10 @@ export function useAsyncStorage<T>(key: string, initialValue: T) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      if (typeof window === 'undefined') return;
+      window.localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // storage poate fi plin/indisponibil – ignoră
+      // Ignoră: storage plin / privacy mode etc.
     }
   }, [key, value]);
 
